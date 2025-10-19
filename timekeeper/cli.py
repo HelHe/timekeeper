@@ -30,6 +30,26 @@ def append_record(text: str) -> Path:
     return p
 
 
+def cmd_log() -> int:
+    try:
+        entry = input("What are you doing? ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print("\n(cancelled)")
+        return 1
+    if not entry:
+        print("(empty, not saved)")
+        return 0
+    p = append_record(entry)
+    print(f"Saved -> {p}")
+    return 0
+
+
+def main():
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "log"
+    if cmd == "log":
+        raise SystemExit(cmd_log())
+    print("Timekeeper log")
+
 
 
 
