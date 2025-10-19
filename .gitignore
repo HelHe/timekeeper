@@ -1,16 +1,60 @@
-# venvs
-.venv/
-venv/
-# Python cache
+# --- Python ---
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+*.py.class
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+*.env
+Scripts/
+# Optional: if you store venvs in a shared "python" folder
+python_envs/
+
+# --- Distribution / packaging ---
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+pip-wheel-metadata/
+
+# --- Installer logs ---
+pip-log.txt
+
+# --- Unit test / coverage ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
 .pytest_cache/
-# OS/editor
-.DS_Store
-Thumbs.db
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pyre/
+mypy_cache/
+
+# --- Editor / IDE ---
 .vscode/
 .idea/
-# Python packaging
-*.egg-info/
+*.swp
+*.swo
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+
+# --- Project specific (optional) ---
+# timekeeper logs (if you don’t want to version your activity logs)
+.timekeeperlog/
