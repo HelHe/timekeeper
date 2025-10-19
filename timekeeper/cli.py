@@ -6,6 +6,19 @@ from pathlib import Path
 
 APP_DIR = Path(os.environ.get("TIMEKEEPER_HOME", Path.home()/".timekeeperlog"))
 
+# Tag helper
+def _filter_by_tag(recs: list[dict], tag: str | None) -> list[dict]:
+    """Return only records that contain the tag (case insensitive)"""
+    if not tag:
+        return recs
+    tag = tag.lstrip("#").lower()
+    out: list[dict] = []
+    for r in recs:
+        tags = [t.lower() for t in r.get("tags", [])]
+        if tag in tags:
+            out.append(r)
+    return out
+
 # Helper to return a days log file into a list of dicts
 def _read_day_file(d: date) -> list[dict]:
     """Return list of records for a given day"""
@@ -38,19 +51,21 @@ def _print_records(day: date, recs: list[dict]) -> None:
         print(f"{ts} {text}{tag_str}")
     print()
 
-def cmd_show_today() -> int:
+def cmd_show_today(tag: str | None = None) -> int:
     d = date.today()
-    _print_records(d, _read_day_file(d))
+    recs = _filter_by_tag(_read_day_file(d), tag)
+    _print_records(d, recs)
     return 0
 
-def cmd_show_day(s: str) -> int:
+def cmd_show_day(s: str, tag: str | None = None) -> int:
     try:
         y, m, d = (int(x) for x in s.split("-"))
         the_day = date(y, m, d)
     except Exception:
         print("Invalid date. use YYYY-MM-DD.")
         return 2
-    _print_records(the_day, _read_day_file(the_day))
+    recs = _filter_by_tag(_read_day_file(the_day), tag)
+    _print_records(the_day, recs)
     return 0
 
 def _tags_from(text: str) -> list[str]:
@@ -93,10 +108,38 @@ def cmd_log() -> int:
 
 
 def main():
-    cmd = sys.argv[1] if len(sys.argv) > 1 else "log"
+    # usage: timekeeper [log|show] [--today|--day YYYY-MM-DD] [--tag name]
+    args = sys.argv[1:]
+    tag = None
+    if "--tag" in args:
+        i = args.index("--tag")
+        try:
+            tag = args[i + 1]
+        except IndexError:
+            print("Expected a tag after --tag")
+            return 2
+        args = args[:i] + args[i + 2:]
+
+    if not args:
+        return cmd_log()
+
+    cmd = args[0]
     if cmd == "log":
-        raise SystemExit(cmd_log())
-    print("Timekeeper log")
+        return cmd_log()
+
+    if cmd == "show":
+        if not args[1:]:
+            return cmd_show_today(tag)
+        sub = args[1]
+        if sub == "--today":
+            return cmd_show_today(tag)
+        if sub == "--day" and len(args) >= 3:
+            return cmd_show_day(args[2], tag)
+        print("Usage: timekeeper show [--today | --day YYYY-MM-DD | --tag name]")
+        return 2
+
+    print("Usage: timekeeper [log | show ...]")
+    return 2
 
 
 
