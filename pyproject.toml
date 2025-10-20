@@ -8,3 +8,4 @@ dependencies = []
 
 [project.scripts]
 timekeeper = "timekeeper.cli:main"
+timekeeper-reminder = "timekeeper.reminder:main"
