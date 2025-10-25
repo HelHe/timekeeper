@@ -4,16 +4,25 @@ from PIL import Image, ImageDraw
 
 
 class Tray:
-    def __init__(self, on_log_now, on_open_logs, on_exit):
+    def __init__(self, on_log_now, on_open_logs, on_exit, on_view_today=None):
+        # Build the menu items first
+        items = [
+            pystray.MenuItem("Log now", lambda *_: on_log_now()),
+        ]
+        if on_view_today:
+            items.append(pystray.MenuItem("View today", lambda *_: on_view_today()))
+        items.extend(
+            [
+                pystray.MenuItem("Open log folder", lambda *_: on_open_logs()),
+                pystray.MenuItem("Exit", lambda *_: on_exit()),
+            ]
+        )
+
         self._icon = pystray.Icon(
             name="Timekeeper",
             title="Timekeeper",
             icon=self._make_image(),
-            menu=pystray.Menu(
-                pystray.MenuItem("Log now", lambda *_: on_log_now()),
-                pystray.MenuItem("Open log folder", lambda *_: on_open_logs()),
-                pystray.MenuItem("Exit", lambda *_: on_exit()),
-            ),
+            menu=pystray.Menu(*items),  # ← unpack the list into Menu(...)
         )
         self._thread = None
 

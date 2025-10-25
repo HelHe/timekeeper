@@ -8,6 +8,7 @@ from .cli import append_record, APP_DIR
 from .cli import main
 import os, sys, webbrowser
 from .tray import Tray
+from .viewer import open_today_viewer
 
 
 CONFIG_FILE = APP_DIR / "config.json"
@@ -51,6 +52,9 @@ class ReminderApp:
             on_log_now=lambda: self.root.after(0, self.prompt),
             on_open_logs=lambda: _open_folder(APP_DIR),
             on_exit=lambda: self.root.after(0, self.root.quit),
+            on_view_today=lambda: self.root.after(
+                0, lambda: open_today_viewer(self.root)
+            ),
         )
         self.tray.start()
         # kick off first prompt at start
