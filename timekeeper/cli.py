@@ -4,7 +4,8 @@ import itertools
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
-APP_DIR = Path(os.environ.get("TIMEKEEPER_HOME", Path.home()/".timekeeperlog"))
+APP_DIR = Path(os.environ.get("TIMEKEEPER_HOME", Path.home() / ".timekeeperlog"))
+
 
 # Tag helper
 def _filter_by_tag(recs: list[dict], tag: str | None) -> list[dict]:
@@ -18,6 +19,7 @@ def _filter_by_tag(recs: list[dict], tag: str | None) -> list[dict]:
         if tag in tags:
             out.append(r)
     return out
+
 
 # Helper to return a days log file into a list of dicts
 def _read_day_file(d: date) -> list[dict]:
@@ -42,20 +44,22 @@ def _read_day_file(d: date) -> list[dict]:
 # Help to print records, either today or show day yyyy-mm-dd
 def _print_records(day: date, recs: list[dict]) -> None:
     header = day.isoformat()
-    print(f"=== {header} ({len(recs)} entr{'y' if len(recs)==1 else 'ies'}) ===")
+    print(f"=== {header} ({len(recs)} entr{'y' if len(recs) == 1 else 'ies'}) ===")
     for r in recs:
-        ts = r.get("ts", "")[11:16] #HH:MM from iso
+        ts = r.get("ts", "")[11:16]  # HH:MM from iso
         text = r.get("text", "")
         tags = r.get("tags", [])
-        tag_str = f" [{' '.join('#'+t for t in tags)}]" if tags else ""
+        tag_str = f" [{' '.join('#' + t for t in tags)}]" if tags else ""
         print(f"{ts} {text}{tag_str}")
     print()
+
 
 def cmd_show_today(tag: str | None = None) -> int:
     d = date.today()
     recs = _filter_by_tag(_read_day_file(d), tag)
     _print_records(d, recs)
     return 0
+
 
 def cmd_show_day(s: str, tag: str | None = None) -> int:
     try:
@@ -68,6 +72,7 @@ def cmd_show_day(s: str, tag: str | None = None) -> int:
     _print_records(the_day, recs)
     return 0
 
+
 def _tags_from(text: str) -> list[str]:
     # Tag extractor
     tags = []
@@ -75,6 +80,7 @@ def _tags_from(text: str) -> list[str]:
         if word.startswith("#") and len(word) > 1:
             tags.append(word[1:])
     return tags
+
 
 # Define log path
 def _log_path(dt: datetime) -> Path:
@@ -118,12 +124,17 @@ def main():
         except IndexError:
             print("Expected a tag after --tag")
             return 2
-        args = args[:i] + args[i + 2:]
+        args = args[:i] + args[i + 2 :]
 
     if not args:
         return cmd_log()
 
     cmd = args[0]
+    if cmd in ("remind", "reminder", "start"):
+        from .reminder import main as reminder_main
+
+        reminder_main()
+        return 0
     if cmd == "log":
         return cmd_log()
 
@@ -140,11 +151,3 @@ def main():
 
     print("Usage: timekeeper [log | show ...]")
     return 2
-
-
-
-
-
-
-
- 
