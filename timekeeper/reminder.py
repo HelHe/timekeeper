@@ -5,7 +5,6 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from datetime import datetime
 from .cli import append_record, APP_DIR
-from .cli import main
 import os, sys, webbrowser
 from .tray import Tray
 
@@ -42,7 +41,8 @@ class ReminderApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Timekeeper Reminder")
-        self.root.withdraw()  # keep invisible
+        self.root.attributes("-topmost", True)
+        self.root.withdraw()  # keep hidden until prompt
         self.cfg = load_config()
         self.interval_ms = (
             int(self.cfg.get("interval_min", DEFAULT_INTERVAL_MIN)) * 60_000
@@ -51,17 +51,29 @@ class ReminderApp:
             on_log_now=lambda: self.root.after(0, self.prompt),
             on_open_logs=lambda: _open_folder(APP_DIR),
             on_exit=lambda: self.root.after(0, self.root.quit),
-            on_view_today=lambda: self.root.after(
-                0, lambda: open_today_viewer(self.root)
-            ),
+            on_view_today=lambda: self.root.after(0, self.open_today),
         )
         self.tray.start()
         # kick off first prompt at start
         self.root.after(3_000, self.prompt)
 
+    def open_today(self) -> None:
+        self.root.deiconify()
+        self.root.update_idletasks()
+        try:
+            from .viewer import open_today_viewer
+
+            open_today_viewer(self.root)
+        finally:
+            self.root.withdraw()
+
     def prompt(self):
         try:
-            text = simpledialog.askstring("Timekeeper", "What are you doing right now?")
+            text = simpledialog.askstring(
+                "Timekeeper",
+                "What are you doing right now?",
+                parent=self.root,
+            )
             if text and text.strip():
                 p = append_record(text.strip())
 
@@ -69,6 +81,7 @@ class ReminderApp:
             # show error but keep alive
             messagebox.showerror("Timekeeper", f"Error: {e}")
         finally:
+            self.root.withdraw()
             self.root.after(self.interval_ms, self.prompt)
 
 
