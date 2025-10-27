@@ -8,7 +8,6 @@ from .cli import append_record, APP_DIR
 from .cli import main
 import os, sys, webbrowser
 from .tray import Tray
-from .viewer import open_today_viewer
 
 
 CONFIG_FILE = APP_DIR / "config.json"

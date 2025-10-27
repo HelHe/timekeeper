@@ -44,7 +44,7 @@ class _TodayViewer(tk.Toplevel):
         self.refresh()
 
     def refresh(self):
-        recs = read_day_file(date.today())
+        recs = _read_day_file(date.today())
         self.listbox.delete(0, "end")
         for r in recs:
             ts = r.get("ts", "")[11:16]
